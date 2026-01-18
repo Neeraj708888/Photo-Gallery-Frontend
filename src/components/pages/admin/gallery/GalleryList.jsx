@@ -2,13 +2,16 @@ import React, { useEffect, useState } from "react";
 import { Edit, Trash, Search, ImagePlus, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllGalleries } from "../../../../features/thunks/galleryThunk";
+import { deleteGallery, getAllGalleries } from "../../../../features/thunks/galleryThunk";
+import DeleteModal from "../../modals/DeleteModal";
 
 const GalleryList = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { gallery, loading, errorMessage, successMessage } = useSelector(state => state.galleries);
   const [search, setSearch] = useState("");
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   useEffect(() => {
     dispatch(getAllGalleries());
@@ -24,6 +27,26 @@ const GalleryList = () => {
   // 🧠 Toggle status
   const handleStatusToggle = (id) => {
     alert(`Toggle status for ID: ${id}`);
+  };
+
+  // Delete
+  const handleDeleteClick = (item) => {
+    setSelectedItem(item);
+    setIsDeleteOpen(true);
+  }
+
+  const confrimDelete = () => {
+    dispatch(deleteGallery(selectedItem._id))
+      .then(() => {
+        setIsDeleteOpen(false);
+        setSelectedItem(null);
+        dispatch(getAllGalleries());
+      });
+  };
+
+  const cancelDelete = () => {
+    setIsDeleteOpen(false);
+    setSelectedItem(null);
   };
 
 
@@ -140,6 +163,7 @@ const GalleryList = () => {
                       </button>
                       <button
                         className="p-2 rounded-full hover:bg-rose-100 text-red-600 transition"
+                        onClick={() => handleDeleteClick(gallery)}
                         title="Delete"
                       >
                         <Trash size={18} />
@@ -161,6 +185,15 @@ const GalleryList = () => {
           </tbody>
         </table>
       </div>
+
+      <DeleteModal
+        isOpen={isDeleteOpen}
+        onConfirm={confrimDelete}
+        onCancel={cancelDelete}
+        title="Delete Gallery"
+        message={`Are you sure you want to delete "${selectedItem?.galleryName}"`}
+      />
+
     </section>
   );
 };

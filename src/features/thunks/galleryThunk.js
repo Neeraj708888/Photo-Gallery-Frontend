@@ -29,27 +29,43 @@ export const createGallery = createAsyncThunk(
 );
 
 // Update Gallery Thunk-Api
-export const updateGallery = createAsyncThunk("gallery/update", async ({ id, payload }, { rejectWithValue }) => {
-    try {
-        const response = await axiosInstance.put(`/gallery/update/${id}`, payload);
+export const updateGallery = createAsyncThunk(
+    "gallery/update",
+    async ({ id, payload }, { rejectWithValue }) => {
+        try {
+            const res = await axiosInstance.post(
+                `/gallery/update/${id}`,
+                payload,
+                {
+                    headers: { "Content-Type": "multipart/form-data" },
+                }
+            );
 
-        return response.data;
-    } catch (error) {
-        return rejectWithValue(error.response?.data?.message || "Internal error in update gallery");
+            console.log("Update Gallery Thunk Response: ", res.data);
+
+            return res.data;
+        } catch (err) {
+            return rejectWithValue(err.response?.data?.message);
+        }
     }
-});
+);
 
 // Delete Gallery Think-Api
-export const deleteGallery = createAsyncThunk("gallery/delete", async (id, { rejectWithValue }) => {
-    try {
-        const response = await axiosInstance.delete(`/gallery/delete/${id}`);
+export const deleteGallery = createAsyncThunk(
+    "gallery/delete",
+    async (id, { rejectWithValue }) => {
+        try {
+            const res = await axiosInstance.delete(`/gallery/${id}`);
+            console.log("Delete Gallery Thunk Response: ", res.data);
 
-        return response.data;
-
-    } catch (error) {
-        return rejectWithValue(error.response?.data?.message || "Internal error in delete gallery");
+            return res.data; // { success, message, data }
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data?.message || "Failed to delete gallery"
+            );
+        }
     }
-});
+);
 
 // Get All Gallery Thunk-Api 
 export const getAllGalleries = createAsyncThunk(

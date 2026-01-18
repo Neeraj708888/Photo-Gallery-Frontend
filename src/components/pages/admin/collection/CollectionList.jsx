@@ -20,13 +20,16 @@ const CollectionList = () => {
     errorMessage,
   } = useSelector((state) => state.collections);
 
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
   const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedCollection, setSelectedCollection] = useState(null);
   const [search, setSearch] = useState("");
 
+  // Modals State
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [createCollectionModal, setCreateCollectionModal] = useState(false);
   const [editCollectionModal, setEditCollectionModal] = useState(false);
-  const [selectedCollection, setSelectedCollection] = useState(null);
+
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);

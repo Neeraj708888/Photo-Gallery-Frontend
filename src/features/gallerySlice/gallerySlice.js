@@ -58,7 +58,7 @@ const gallerySlice = createSlice({
         state.successMessage = null;
       })
       .addCase(getSingleGallery.fulfilled, (state, action) => {
-        console.log("Single Gallery Thunk Response: ", action.payload.data);
+        console.log("Single Gallery Slice Response: ", action.payload.data);
         state.loading = false;
         state.singleGallery = action.payload.data;
       })
@@ -67,23 +67,33 @@ const gallerySlice = createSlice({
         state.errorMessage = action.payload;
       })
       // UPDATE
+      .addCase(updateGallery.pending, (state, action) => {
+        state.loading = true;
+        state.errorMessage = null;
+        state.successMessage = null;
+      })
       .addCase(updateGallery.fulfilled, (state, action) => {
+        console.log("Update Gallery Slice Response: ", action.payload.data);
         state.loading = false;
-        state.gallery = state.gallery.map((item) =>
-          item._id === action.payload.data._id
-            ? action.payload.data
-            : item
-        );
+        state.singleGallery = action.payload.data;
         state.successMessage = action.payload.message;
       })
 
       // DELETE
+      .addCase(deleteGallery.pending, (state, action) => {
+        state.loading = true;
+      })
       .addCase(deleteGallery.fulfilled, (state, action) => {
+        console.log("Delete Gallery Slice Response: ", action.payload);
         state.loading = false;
         state.gallery = state.gallery.filter(
-          (item) => item._id !== action.payload.data._id
+          (item) => item._id !== action.payload._id
         );
         state.successMessage = action.payload.message;
+      })
+      .addCase(deleteGallery.rejected, (state, action) => {
+        state.loading = false;
+        state.errorMessage = action.payload.message;
       })
 
       // Toggle Status

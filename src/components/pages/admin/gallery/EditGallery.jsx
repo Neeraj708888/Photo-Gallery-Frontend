@@ -1,57 +1,48 @@
 import React, { useState, useEffect } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { getSingleGallery, updateGallery } from "../../../../features/thunks/galleryThunk";
+import { getAllcollections } from "../../../../features/thunks/collectionThunk";
 
 export default function EditGallery() {
 
+  const { galleryId } = useParams();
+  console.log("Gallery Id: ", galleryId);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { singleGallery, loading, errorMessage, successMessage } = useSelector(state => state.galleries);
+  const { collections } = useSelector(state => state.collections);
+
+  // Local State
   const [form, setForm] = useState({
-    collection: "",
-    gallery: "",
-    quotes: "",
-    date: "",
-    time: "",
+    galleryName: "",
+    collectionId: "",
     image: null,
   });
 
   const [imagePreview, setImagePreview] = useState(null);
   const [focusedField, setFocusedField] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [successMsg, setSuccessMsg] = useState("");
 
-  // 🌸 Static dropdown data
-  const collectionOptions = [
-    "Nature Collection",
-    "Wedding Memories",
-    "Travel Diaries",
-    "Festival Shots",
-  ];
-  const galleryOptions = [
-    "Beach Vibes",
-    "Haldi Ceremony",
-    "City Nights",
-    "Mountain Views",
-  ];
-
-  // 📦 Prefill existing photo data (Simulated)
+  // Fetch Single Gallery First
   useEffect(() => {
-    const existingData = {
-      collection: "Wedding Memories",
-      gallery: "Haldi Ceremony",
-      quotes: "Golden moments of love and laughter 💛",
-      date: "2025-11-06",
-      time: "12:45",
-      image:
-        "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=600&q=80",
-    };
-    setForm(existingData);
-    setImagePreview(existingData.image);
-  }, []);
+    if (galleryId) dispatch(getSingleGallery(galleryId));
+    dispatch(getAllcollections());
+  }, [galleryId, dispatch]);
 
-  // ✏️ Input handlers
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
+
+  // Prefill Data
+  useEffect(() => {
+    if (singleGallery) {
+      setForm({
+        galleryName: singleGallery.galleryName || "",
+        collectionId: singleGallery?.collection?._id || "",
+        image: singleGallery?.thumbnail?.url || null,
+      });
+
+      setImagePreview(singleGallery?.thumbnail?.url || null);
+    }
+  }, [singleGallery]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -66,18 +57,36 @@ export default function EditGallery() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setSubmitting(true);
-    setSuccessMsg("");
 
-    setTimeout(() => {
-      setSubmitting(false);
-      setSuccessMsg(`Photo details updated successfully!`);
-    }, 1000);
+    const formData = new FormData();
+    formData.append("galleryName", form.galleryName);
+    formData.append("collection", form.collectionId);
+
+    if (form.image) {
+      formData.append("thumbnail", form.image);
+    }
+
+    setSubmitting(true);
+
+    dispatch(
+      updateGallery({
+        id: galleryId,
+        payload: formData
+      })
+    )
+      .unwrap()
+      .then(() => {
+        setSubmitting(false);
+        navigate("/admin/gallery");
+      })
+      .catch(() => {
+        setSubmitting(false);
+      });
   };
 
+
   const inputWrapperClass = (field) =>
-    `transition-shadow duration-200 rounded-lg p-1 ${
-      focusedField === field ? "shadow-lg ring-2 ring-pink-300" : "shadow-sm"
+    `transition-shadow duration-200 rounded-lg p-1 ${focusedField === field ? "shadow-lg ring-2 ring-pink-300" : "shadow-sm"
     }`;
 
   return (
@@ -110,16 +119,19 @@ export default function EditGallery() {
           <div className={inputWrapperClass("collection")}>
             <select
               name="collection"
-              value={form.collection}
-              onChange={handleChange}
+              value={form?.collectionId}
+              onChange={(e) => setForm(prev => ({
+                ...prev,
+                collectionId: e.target.value
+              }))}
               onFocus={() => handleFocus("collection")}
               onBlur={handleBlur}
               className="w-full bg-transparent px-4 py-3 rounded-lg text-gray-800 focus:outline-none appearance-none"
             >
               <option value="">-- Select a Collection --</option>
-              {collectionOptions.map((option, i) => (
-                <option key={i} value={option}>
-                  {option}
+              {collections.map((col) => (
+                <option key={col?._id} value={col._id}>
+                  {col?.collectionName}
                 </option>
               ))}
             </select>
@@ -131,9 +143,12 @@ export default function EditGallery() {
           <span className="text-gray-700 font-medium mb-1 block">Gallery Name</span>
           <div className={inputWrapperClass("quotes")}>
             <input
-              name="quotes"
-              value={form.quotes}
-              onChange={handleChange}
+              name="galleryName"
+              value={form.galleryName}
+              onChange={(e) => setForm(prev => ({
+                ...prev,
+                galleryName: e.target.value
+              }))}
               onFocus={() => handleFocus("quotes")}
               onBlur={handleBlur}
               placeholder="Write your thoughts about this moment..."
@@ -143,56 +158,6 @@ export default function EditGallery() {
           </div>
         </label>
 
-
-        {/* Quotes */}
-        <label className="block mb-4">
-          <span className="text-gray-700 font-medium mb-1 block">Quotes</span>
-          <div className={inputWrapperClass("quotes")}>
-            <textarea
-              name="quotes"
-              value={form.quotes}
-              onChange={handleChange}
-              onFocus={() => handleFocus("quotes")}
-              onBlur={handleBlur}
-              placeholder="Write your thoughts about this moment..."
-              rows={3}
-              className="w-full bg-transparent px-4 py-3 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none resize-none"
-            />
-          </div>
-        </label>
-
-        {/* Date & Time */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          <label className="block">
-            <span className="text-gray-700 font-medium mb-1 block">Date</span>
-            <div className={inputWrapperClass("date")}>
-              <input
-                type="date"
-                name="date"
-                value={form.date}
-                onChange={handleChange}
-                onFocus={() => handleFocus("date")}
-                onBlur={handleBlur}
-                className="w-full bg-transparent px-4 py-3 rounded-lg text-gray-800 focus:outline-none"
-              />
-            </div>
-          </label>
-
-          <label className="block">
-            <span className="text-gray-700 font-medium mb-1 block">Time</span>
-            <div className={inputWrapperClass("time")}>
-              <input
-                type="time"
-                name="time"
-                value={form.time}
-                onChange={handleChange}
-                onFocus={() => handleFocus("time")}
-                onBlur={handleBlur}
-                className="w-full bg-transparent px-4 py-3 rounded-lg text-gray-800 focus:outline-none"
-              />
-            </div>
-          </label>
-        </div>
 
         {/* Upload Image */}
         <label className="block mb-4">
@@ -226,28 +191,87 @@ export default function EditGallery() {
           <button
             type="submit"
             disabled={submitting}
-            className={`inline-flex items-center gap-2 px-5 py-2 rounded-md font-semibold transition-all duration-200 ${
-              submitting
-                ? "bg-pink-300 text-white cursor-wait"
-                : "bg-pink-600 hover:bg-pink-700 text-white"
-            }`}
+            className={`inline-flex items-center gap-2 px-5 py-2 rounded-md font-semibold transition-all duration-200 ${submitting
+              ? "bg-pink-300 text-white cursor-wait"
+              : "bg-pink-600 hover:bg-pink-700 text-white"
+              }`}
           >
             {submitting ? "Modifying..." : "Modify"}
           </button>
 
-           <button
+          <button
             type="button"
             className='inline-flex items-center gap-2 px-5 py-2 rounded-md font-semibold transition-all duration-200  bg-pink-600 hover:bg-pink-700 text-white' onClick={() => navigate('/admin/gallery')}>
-           Back
+            Back
           </button>
-
-          {successMsg && (
-            <p className="text-sm text-green-600 text-center sm:text-right">
-              {successMsg}
-            </p>
-          )}
         </div>
+
+        {/* Messages */}
+        {successMessage && (
+          <p className="mt-4 text-green-600 font-medium">{successMessage}</p>
+        )}
+        {errorMessage && (
+          <p className="mt-4 text-red-600 font-medium">{errorMessage}</p>
+        )}
       </form>
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+{/* Date & Time */ }
+{/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+  <label className="block">
+    <span className="text-gray-700 font-medium mb-1 block">Date</span>
+    <div className={inputWrapperClass("date")}>
+      <input
+        type="date"
+        name="date"
+        value={form.date}
+        onChange={handleChange}
+        onFocus={() => handleFocus("date")}
+        onBlur={handleBlur}
+        className="w-full bg-transparent px-4 py-3 rounded-lg text-gray-800 focus:outline-none"
+      />
+    </div>
+  </label>
+
+  <label className="block">
+    <span className="text-gray-700 font-medium mb-1 block">Time</span>
+    <div className={inputWrapperClass("time")}>
+      <input
+        type="time"
+        name="time"
+        value={form.time}
+        onChange={handleChange}
+        onFocus={() => handleFocus("time")}
+        onBlur={handleBlur}
+        className="w-full bg-transparent px-4 py-3 rounded-lg text-gray-800 focus:outline-none"
+      />
+    </div>
+  </label>
+</div> */}
+
+{/* Quotes */ }
+{/* <label className="block mb-4">
+  <span className="text-gray-700 font-medium mb-1 block">Quotes</span>
+  <div className={inputWrapperClass("quotes")}>
+    <textarea
+      name="quotes"
+      value={form.quotes}
+      onChange={handleChange}
+      onFocus={() => handleFocus("quotes")}
+      onBlur={handleBlur}
+      placeholder="Write your thoughts about this moment..."
+      rows={3}
+      className="w-full bg-transparent px-4 py-3 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none resize-none"
+    />
+  </div>
+</label> */}
