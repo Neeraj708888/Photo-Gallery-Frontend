@@ -58,10 +58,10 @@ const GalleryList = () => {
   }
 
   return (
-    <section className="min-h-screen  bg-gradient-to-br from-pink-50 via-rose-50 to-white p-4 sm:p-6">
+    <section className="min-h-screen  bg-gradient-to-br from-pink-50 via-rose-50 to-white pl-3 sm:pl-4 md:pl-6 lg:pl-0 ">
       {/* 🌸 Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <h1 className="text-3xl font-semibold text-pink-600 flex items-center gap-2">
+        <h1 className="text-3xl font-semibold text-pink-600 flex items-center gap-2 ">
           <ImagePlus className="w-7 h-7" />
           Gallery Management
         </h1>

@@ -2,15 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllcollections } from "../../../features/thunks/collectionThunk";
 
-// const images = [
-//     "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1600&q=80",
-//     "https://images.unsplash.com/photo-1517816428104-797678c7cf0d?auto=format&fit=crop&w=1600&q=80",
-//     "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80",
-//     "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
-//     "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
-//     "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80",
-// ];
-
 const Hero = () => {
     const [current, setCurrent] = useState(0);
     const { collections, loading } = useSelector(state => state.collections);

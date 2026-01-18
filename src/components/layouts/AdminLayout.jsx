@@ -9,7 +9,7 @@ const AdminLayout = () => {
   const toggleSidebar = () => setIsOpen(!isOpen);
 
   return (
-    <div className="flex min-h-screen bg-gray-100 ml-16">
+    <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
       <AdminSidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
 
@@ -19,7 +19,7 @@ const AdminLayout = () => {
         <AdminNavbar isOpen={isOpen} toggleSidebar={toggleSidebar} />
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto mt-[70px] mb-[60px]  bg-white/70 backdrop-blur-sm rounded-tl-2xl shadow-inner">
+        <main className="flex-1 overflow-y-auto mt-[70px] mb-[60px]  bg-white/70 backdrop-blur-sm rounded-tl-2xl shadow-inner pl-3 sm-pl-4 md:pl-6 lg:pl-0">
           <Outlet />
         </main>
 
