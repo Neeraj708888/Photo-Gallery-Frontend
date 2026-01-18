@@ -1,66 +1,104 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { createGallery, deleteGallery, getSingleGallery, updateGallery } from "../thunks/galleryThunk";
-
-
+import { createGallery, deleteGallery, getAllGalleries, getSingleGallery, toggleGalleryStatus, updateGallery } from "../thunks/galleryThunk";
 
 const gallerySlice = createSlice({
   name: "galleries",
   initialState: {
-    gallery: [],
-    singleGallery: null,
-
+    gallery: [],              // list
+    singleGallery: null,      // single item
     loading: false,
     errorMessage: null,
     successMessage: null,
   },
+
   reducers: {
     clearMessage: (state) => {
       state.errorMessage = null;
       state.successMessage = null;
     },
-
   },
 
   extraReducers: (builder) => {
-    // Create Collection
+
+    // CREATE
     builder
       .addCase(createGallery.pending, (state) => {
         state.loading = true;
         state.errorMessage = null;
       })
       .addCase(createGallery.fulfilled, (state, action) => {
-        state.loading = false,
-          state.gallery.unshift(action.payload.data);
+        console.log("Create Gallery Slice Response: ", action.payload);
+        state.loading = false;
+        state.gallery.unshift(action.payload); // ✅ safe
         state.successMessage = action.payload.message;
       })
       .addCase(createGallery.rejected, (state, action) => {
         state.loading = false;
-        state.errorMessage = action.payload;
+        state.errorMessage = action.payload.message;
       })
-      // Get Single Collection
+
+      // All Gallery
+      .addCase(getAllGalleries.pending, (state, action) => {
+        state.loading = true;
+      })
+      .addCase(getAllGalleries.fulfilled, (state, action) => {
+        console.log("All Gallery Slice Response: ", action.payload);
+        state.loading = false;
+        state.gallery = action.payload; // ✅ FIXED
+      })
+      .addCase(getAllGalleries.rejected, (state, action) => {
+        state.loading = false;
+        state.errorMessage = action.payload.message;
+      })
+
+      // Get Single Gallery
+      .addCase(getSingleGallery.pending, (state, action) => {
+        state.loading = true;
+        state.errorMessage = null;
+        state.successMessage = null;
+      })
       .addCase(getSingleGallery.fulfilled, (state, action) => {
+        console.log("Single Gallery Thunk Response: ", action.payload.data);
+        state.loading = false;
+        state.singleGallery = action.payload.data;
+      })
+      .addCase(getSingleGallery.rejected, (state, action) => {
         state.loading = false;
         state.errorMessage = action.payload;
       })
-
-      // Update Collection
+      // UPDATE
       .addCase(updateGallery.fulfilled, (state, action) => {
         state.loading = false;
-        state.gallery = state.gallery.map((item) => item._id === action.payload.data._id ? action.payload.data : item);
-
+        state.gallery = state.gallery.map((item) =>
+          item._id === action.payload.data._id
+            ? action.payload.data
+            : item
+        );
         state.successMessage = action.payload.message;
       })
 
-      // Delete Collection
+      // DELETE
       .addCase(deleteGallery.fulfilled, (state, action) => {
         state.loading = false;
-        state.gallery = state.gallery.filter((item) => item._id !== action.payload.data._id);
-
+        state.gallery = state.gallery.filter(
+          (item) => item._id !== action.payload.data._id
+        );
         state.successMessage = action.payload.message;
+      })
+
+      // Toggle Status
+      .addCase(toggleGalleryStatus.pending, (state, action) => {
+        state.pending = false;
+      })
+      .addCase(toggleGalleryStatus.fulfilled, (state, action) => {
+        state.gallery = state.gallery.map((g) => g._id === action.payload.data._id ? action.payload.data : g);
+      })
+      .addCase(toggleGalleryStatus.rejected, (state, action) => {
+        state.loading = false;
+        state.errorMessage = action.payload.data.message || action.payload.data;
       });
-  }
-},
-)
+  },
+});
 
 export const { clearMessage } = gallerySlice.actions;
 export default gallerySlice.reducer;

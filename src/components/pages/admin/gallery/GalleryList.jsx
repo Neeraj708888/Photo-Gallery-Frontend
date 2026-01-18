@@ -1,52 +1,35 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Edit, Trash, Search, ImagePlus, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllGalleries } from "../../../../features/thunks/galleryThunk";
 
 const GalleryList = () => {
-  const [search, setSearch] = useState("");
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { gallery, loading, errorMessage, successMessage } = useSelector(state => state.galleries);
+  const [search, setSearch] = useState("");
 
-  // 🩷 Static gallery data
-  const galleries = [
-    {
-      _id: 1,
-      Heading: "Haridwar Wedding",
-      thumbnail:
-        "https://images.unsplash.com/photo-1504198453319-5ce911bafcde?auto=format&fit=crop&w=600&q=80",
-      status: "active",
-    },
-    {
-      _id: 2,
-      Heading: "Haldi Ceremony",
-      thumbnail:
-        "https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&w=600&q=80",
-      status: "inactive",
-    },
-    {
-      _id: 3,
-      Heading: "Family Moments",
-      thumbnail:
-        "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=600&q=80",
-      status: "active",
-    },
-    {
-      _id: 4,
-      Heading: "Engagement Bliss",
-      thumbnail:
-        "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80",
-      status: "inactive",
-    },
-  ];
+  useEffect(() => {
+    dispatch(getAllGalleries());
+  }, [dispatch]);
+
+  console.log("Gallery Data : ", gallery);
 
   // 🔍 Filter galleries
-  const filtered = galleries.filter((g) =>
-    g.Heading.toLowerCase().includes(search.toLowerCase())
+  const filtered = gallery.filter((g) =>
+    g.galleryName.toLowerCase().includes(search.toLowerCase())
   );
 
   // 🧠 Toggle status
   const handleStatusToggle = (id) => {
     alert(`Toggle status for ID: ${id}`);
   };
+
+
+  if (loading) {
+    return <p className="text-center text-pink-500">Loading galleries...</p>;
+  }
 
   return (
     <section className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-white p-4 sm:p-6">
@@ -107,14 +90,14 @@ const GalleryList = () => {
                   {/* Thumbnail */}
                   <td className="py-3 px-5">
                     <img
-                      src={gallery.thumbnail}
+                      src={gallery?.thumbnail?.url}
                       alt="Gallery"
                       className="w-32 h-20 object-cover rounded-lg border border-pink-100 shadow-sm"
                     />
                   </td>
 
                   <td className="py-3 px-5 font-medium text-gray-800">
-                    {gallery.Heading}
+                    {gallery.galleryName}
                   </td>
 
                   {/* Status Toggle */}
@@ -122,7 +105,7 @@ const GalleryList = () => {
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={gallery.status === "active"}
+                        checked={gallery.status === true}
                         onChange={() => handleStatusToggle(gallery._id)}
                         className="sr-only peer"
                       />
@@ -130,12 +113,12 @@ const GalleryList = () => {
                       <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow peer-checked:translate-x-6 transition-all"></div>
                     </label>
                     <span
-                      className={`ml-2 text-sm font-medium ${gallery.status === "active"
+                      className={`ml-2 text-sm font-medium ${gallery.status
                         ? "text-pink-600"
                         : "text-gray-500"
                         }`}
                     >
-                      {gallery.status === "active" ? "Active" : "Inactive"}
+                      {gallery.status ? "Active" : "Inactive"}
                     </span>
                   </td>
 
@@ -144,13 +127,13 @@ const GalleryList = () => {
                     <div className="flex justify-center gap-3 text-pink-600">
                       <button
                         title="View"
-                        className="hover:text-pink-700 transition" onClick={() => navigate('/admin/gallery/view')}
+                        className="hover:text-pink-700 transition" onClick={() => navigate(`/admin/gallery/view/${gallery._id}`)}
                       >
                         <Eye size={18} />
                       </button>
                       <button
                         className="p-2 rounded-full hover:bg-pink-100 transition"
-                        onClick={() => navigate("/admin/gallery/edit")}
+                        onClick={() => navigate(`/admin/gallery/edit/${gallery?._id}`)}
                         title="Edit"
                       >
                         <Edit size={18} />

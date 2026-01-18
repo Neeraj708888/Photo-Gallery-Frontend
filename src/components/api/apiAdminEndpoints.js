@@ -19,6 +19,7 @@ export const API_ENDPOINTS = {
     SEARCH: `${API_URL}/collections/search`,
     SINGLE: (collectionId) => `${API_URL}/collections/${collectionId}`,
     ALL: `${API_URL}/collections`,
+
   },
 
   GALLERY: {

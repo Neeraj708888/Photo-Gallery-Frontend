@@ -1,24 +1,31 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, CheckCircle, XCircle } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { getSingleGallery } from "../../../../features/thunks/galleryThunk";
 
 const ViewGallery = () => {
-  const navigate = useNavigate();
-  const { id } = useParams();
 
-  // 🩷 Static sample data — replace later with API
-  const galleryData = {
-    id: id,
-    thumbnail:
-      "https://images.unsplash.com/photo-1529634892647-3b4b96c45dfd?auto=format&fit=crop&w=900&q=80",
-    name: "Wedding Golden Moments",
-    status: "active",
-    description:
-      "Capturing the most precious moments of a couple’s special day — where love, laughter, and forever begin 💞",
-    createdAt: "2025-11-01",
-    updatedAt: "2025-11-06",
-  };
+  const { galleryId } = useParams();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { singleGallery, loading } = useSelector(state => state.galleries);
+
+  useEffect(() => {
+    if (galleryId)
+      dispatch(getSingleGallery(galleryId));
+  }, [dispatch, galleryId]);
+  console.log("Single Gallery Data: ", singleGallery);
+
+  // Loading
+  if (loading) return (
+    <p className="text-center mt-10">Loading...</p>
+  )
+
+  if (!singleGallery && !loading) return (
+    <p className="text-center mt-10 text-red-500">Gallery not found</p>
+  )
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-100 via-rose-100 to-white flex items-center justify-center py-10 px-4">
@@ -49,28 +56,34 @@ const ViewGallery = () => {
             transition={{ duration: 0.4 }}
           >
             <img
-              src={galleryData.thumbnail}
-              alt={galleryData.name}
+              src={singleGallery?.thumbnail?.url}
+              alt={singleGallery.galleryName}
               className="w-full h-80 object-cover"
             />
           </motion.div>
 
           {/* Info Section */}
           <div className="space-y-4">
-            <div>
-              <h3 className="text-sm text-gray-500 uppercase">Gallery Name</h3>
-              <p className="text-lg font-semibold text-gray-800">{galleryData.name}</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <h3 className="text-sm text-gray-500 uppercase">Gallery Name</h3>
+                <p className="text-lg font-semibold text-gray-800">{singleGallery.galleryName}</p>
+              </div>
+              <div>
+                <h3 className="text-sm text-gray-500 uppercase">Collection Name</h3>
+                <p className="text-lg font-semibold text-gray-800">{singleGallery.collection.collectionName}</p>
+              </div>
             </div>
 
             <div>
               <h3 className="text-sm text-gray-500 uppercase">Description</h3>
-              <p className="text-pink-700 italic">{galleryData.description}</p>
+              <p className="text-pink-700 italic">{singleGallery.description || "NA"}</p>
             </div>
 
             <div>
               <h3 className="text-sm text-gray-500 uppercase">Status</h3>
               <p className="flex items-center gap-2 font-semibold">
-                {galleryData.status === "active" ? (
+                {singleGallery.status ? (
                   <span className="text-green-600 flex items-center gap-1">
                     <CheckCircle size={18} /> Active
                   </span>
@@ -85,11 +98,11 @@ const ViewGallery = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <h3 className="text-sm text-gray-500 uppercase">Created At</h3>
-                <p className="font-semibold text-gray-700">{galleryData.createdAt}</p>
+                <p className="font-semibold text-gray-700">{new Date(singleGallery.createdAt).toLocaleString()}</p>
               </div>
               <div>
                 <h3 className="text-sm text-gray-500 uppercase">Last Updated</h3>
-                <p className="font-semibold text-gray-700">{galleryData.updatedAt}</p>
+                <p className="font-semibold text-gray-700">{new Date(singleGallery.updatedAt).toLocaleString()}</p>
               </div>
             </div>
           </div>
@@ -101,8 +114,8 @@ const ViewGallery = () => {
             💞 A Collection of Everlasting Memories 💞
           </p>
         </div>
-      </motion.div>
-    </div>
+      </motion.div >
+    </div >
   );
 };
 
