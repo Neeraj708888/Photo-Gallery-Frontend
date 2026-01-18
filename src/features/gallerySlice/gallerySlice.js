@@ -101,7 +101,10 @@ const gallerySlice = createSlice({
         state.pending = false;
       })
       .addCase(toggleGalleryStatus.fulfilled, (state, action) => {
-        state.gallery = state.gallery.map((g) => g._id === action.payload.data._id ? action.payload.data : g);
+        console.log("Gallery Status Payload: ", action.payload);
+        if (!action.payload?._id) return;
+
+        state.gallery = state.gallery.map((g) => g._id === action.payload._id ? action.payload : g);
       })
       .addCase(toggleGalleryStatus.rejected, (state, action) => {
         state.loading = false;

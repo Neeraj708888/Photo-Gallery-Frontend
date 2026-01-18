@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { createCollections, deleteCollections, getAllcollections, getSingleCollection, toggleCollectionStatus, updateCollections } from "../thunks/collectionThunk";
-import { act } from "react";
 
 
 const collectionSlice = createSlice({
@@ -107,6 +106,7 @@ const collectionSlice = createSlice({
                 console.log("Collection Status Payload: ", action.payload);
                 state.loading = false;
                 if (!action.payload?._id) return;
+
                 state.collections = action.collections.map(item => item._id === action.payload._id ? action.payload : item);
 
                 state.successMessage = action.payload;

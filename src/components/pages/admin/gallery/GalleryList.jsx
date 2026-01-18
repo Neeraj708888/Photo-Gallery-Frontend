@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Edit, Trash, Search, ImagePlus, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { deleteGallery, getAllGalleries } from "../../../../features/thunks/galleryThunk";
+import { deleteGallery, getAllGalleries, toggleGalleryStatus } from "../../../../features/thunks/galleryThunk";
 import DeleteModal from "../../modals/DeleteModal";
 
 const GalleryList = () => {
@@ -25,8 +25,11 @@ const GalleryList = () => {
   );
 
   // 🧠 Toggle status
-  const handleStatusToggle = (id) => {
-    alert(`Toggle status for ID: ${id}`);
+  const handleStatusToggle = (item) => {
+    dispatch(toggleGalleryStatus({
+      id: item._id,
+      status: !item.status,
+    })).then(() => dispatch(getAllGalleries()));
   };
 
   // Delete
@@ -55,7 +58,7 @@ const GalleryList = () => {
   }
 
   return (
-    <section className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-white p-4 sm:p-6">
+    <section className="min-h-screen  bg-gradient-to-br from-pink-50 via-rose-50 to-white p-4 sm:p-6">
       {/* 🌸 Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <h1 className="text-3xl font-semibold text-pink-600 flex items-center gap-2">
@@ -129,7 +132,7 @@ const GalleryList = () => {
                       <input
                         type="checkbox"
                         checked={gallery.status === true}
-                        onChange={() => handleStatusToggle(gallery._id)}
+                        onChange={() => handleStatusToggle(gallery)}
                         className="sr-only peer"
                       />
                       <div className="w-12 h-6 bg-gray-300 rounded-full peer-checked:bg-pink-500 transition-all"></div>

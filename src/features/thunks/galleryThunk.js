@@ -98,9 +98,9 @@ export const getSingleGallery = createAsyncThunk("single/gallery", async (id, { 
 });
 
 // Status Toggle
-export const toggleGalleryStatus = createAsyncThunk('toggele/gallery', async (id, { rejectWithValue }) => {
+export const toggleGalleryStatus = createAsyncThunk('status/gallery', async ({ id, status }, { rejectWithValue }) => {
     try {
-        const response = await axiosInstance.patch(`/gallery/status/${id}`);
+        const response = await axiosInstance.patch(`/gallery/status/${id}`, { status });
         console.log("Gallery Status Thunk Response: ", response.data);
 
         return response.data;
