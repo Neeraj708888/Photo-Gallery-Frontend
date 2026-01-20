@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { createPhotos, deletePhotos, getSinglePhotos, updatePhotos } from "../thunks/photosThunk";
+import { createPhotos, deletePhotos, getAllPhotos, getSinglePhotos, updatePhotos } from "../thunks/photosThunk";
 
 
 
@@ -7,8 +7,8 @@ import { createPhotos, deletePhotos, getSinglePhotos, updatePhotos } from "../th
 const photoSlice = createSlice({
     name: "photos",
     initialState: {
-        photo: [],
-        singleGallery: null,
+        photos: [],
+        singlePhoto: null,
 
         loading: false,
         errorMessage: null,
@@ -31,7 +31,7 @@ const photoSlice = createSlice({
             })
             .addCase(createPhotos.fulfilled, (state, action) => {
                 state.loading = false,
-                    state.photo.unshift(action.payload.data);
+                    state.photos.unshift(action.payload.data);
                 state.successMessage = action.payload.message;
             })
             .addCase(createPhotos.rejected, (state, action) => {
@@ -43,11 +43,24 @@ const photoSlice = createSlice({
                 state.loading = false;
                 state.errorMessage = action.payload;
             })
+            // Get All Photos
+            .addCase(getAllPhotos.pending, (state, action) => {
+                state.loading = true;
+            })
+            .addCase(getAllPhotos.fulfilled, (state, action) => {
+                console.log("Get All Photos Slice Response: ", action.payload);
+                state.loading = false;
+                state.photos = action.payload;
+            })
+            .addCase(getAllPhotos.rejected, (state, action) => {
+                state.loading = false;
+                state.errorMessage = action.payload.message;
+            })
 
             // Update Collection
             .addCase(updatePhotos.fulfilled, (state, action) => {
                 state.loading = false;
-                state.photo = state.gallery.map((item) => item._id === action.payload.data._id ? action.payload.data : item);
+                state.photos = state.gallery.map((item) => item._id === action.payload.data._id ? action.payload.data : item);
 
                 state.successMessage = action.payload.message;
             })
@@ -55,7 +68,7 @@ const photoSlice = createSlice({
             // Delete Collection
             .addCase(deletePhotos.fulfilled, (state, action) => {
                 state.loading = false;
-                state.photo = state.photo.filter((item) => item._id !== action.payload.data._id);
+                state.photos = state.photos.filter((item) => item._id !== action.payload.data._id);
 
                 state.successMessage = action.payload.message;
             });

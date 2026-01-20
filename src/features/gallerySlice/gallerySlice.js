@@ -25,16 +25,17 @@ const gallerySlice = createSlice({
       .addCase(createGallery.pending, (state) => {
         state.loading = true;
         state.errorMessage = null;
+        state.successMessage = null;
       })
       .addCase(createGallery.fulfilled, (state, action) => {
-        console.log("Create Gallery Slice Response: ", action.payload);
+        console.log("Create Gallery Slice Response: ", action.payload.data);
         state.loading = false;
-        state.gallery.unshift(action.payload); // ✅ safe
+        state.gallery.unshift(action.payload.data); // ✅ safe
         state.successMessage = action.payload.message;
       })
       .addCase(createGallery.rejected, (state, action) => {
         state.loading = false;
-        state.errorMessage = action.payload.message;
+        state.errorMessage = action.payload;
       })
 
       // All Gallery

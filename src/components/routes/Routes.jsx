@@ -19,8 +19,8 @@ import ViewCollection from "../pages/admin/collection/ViewCollection";
 export const routes = [
   { path: "login", element: <Login /> },
   { path: "collection", element: <Collection /> },
-  { path: "gallery", element: <Gallery /> },
-  { path: "photos/:id", element: <Photos /> },
+  { path: "gallery/:galleryId", element: <Gallery /> },
+  { path: "photos/:photoId", element: <Photos /> },
 ];
 
 export const adminRoute = [
@@ -35,6 +35,6 @@ export const adminRoute = [
   { path: "collection/view/:collectionId", element: <ViewCollection /> },
   { path: "photos", element: <PhotosList /> },
   { path: "photos/create", element: <CreatePhotos /> },
-  { path: "photos/edit", element: <EditPhotos /> },
-  { path: "photos/view", element: <ViewPhoto /> },
+  { path: "photos/edit/:photoId", element: <EditPhotos /> },
+  { path: "photos/view/:photoId", element: <ViewPhoto /> },
 ];

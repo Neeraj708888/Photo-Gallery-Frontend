@@ -17,8 +17,8 @@ export const createGallery = createAsyncThunk(
                 },
             );
 
-            console.log("Create Gallery Thunk Response:", response?.data?.data);
-            return response?.data?.data;
+            console.log("Create Gallery Thunk Response:", response?.data);
+            return response?.data;
 
         } catch (error) {
             return rejectWithValue(

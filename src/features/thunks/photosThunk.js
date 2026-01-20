@@ -41,10 +41,11 @@ export const deletePhotos = createAsyncThunk("photos/delete", async (id, { rejec
 });
 
 // Get All Collection Thunk-Api 
-export const photos = createAsyncThunk("photos", async (_, { rejectWithValue }) => {
+export const getAllPhotos = createAsyncThunk("photos", async (_, { rejectWithValue }) => {
     try {
         const response = await axiosInstance.get("/photos");
-        return response.data;
+        console.log("Photos thunk Response: ", response.data.data);
+        return response.data.data;
 
     } catch (error) {
         return rejectWithValue(error.response?.data?.message || "Internal error in fetch photos");

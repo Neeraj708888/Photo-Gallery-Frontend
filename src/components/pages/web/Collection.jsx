@@ -1,39 +1,23 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-
-const cardData = [
-    {
-        id: 1,
-        title: "Nature Collection",
-        img: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80",
-        photos: 32,
-    },
-    {
-        id: 2,
-        title: "City Vibes",
-        img: "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?auto=format&fit=crop&w=800&q=80",
-        photos: 45,
-    },
-    {
-        id: 3,
-        title: "Adventure Trails",
-        img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
-        photos: 21,
-    },
-    {
-        id: 4,
-        title: "Ocean Bliss",
-        img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
-        photos: 18,
-    },
-];
+import { getAllcollections } from "../../../features/thunks/collectionThunk";
 
 const Collection = () => {
 
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    const { collections } = useSelector(state => state.collections);
+
+    // Fetch Collection
+    useEffect(() => {
+        dispatch(getAllcollections());
+    }, [dispatch]);
 
     const handleNavigate = (id) => {
-        navigate(`/photos/${id}`);
+        console.log("Hit Collection Id: ", id);
+        navigate(`/gallery/${id}`);
     };
 
     return (
@@ -49,26 +33,25 @@ const Collection = () => {
             </div>
 
             {/* Cards Grid */}
-            <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                {cardData.map((card) => (
+            <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:place-items-start lg:place-items-center">
+                {collections.map((col) => (
                     <div
-                        key={card.id}
-                        className="group cursor-pointer overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 bg-white flex flex-col justify-between"
-
+                        key={col._id}
+                        className="group cursor-pointer overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 bg-white flex flex-col justify-between w-full max-w-[300px]"
                     >
                         {/* Title */}
                         <div className="p-4 flex items-center justify-between">
                             <h3 className="text-lg sm:text-xl font-semibold text-gray-800">
-                                {card.title}
+                                {col.collectionName}
                             </h3>
                         </div>
 
                         {/* Image */}
-                        <div className="relative w-full h-56 sm:h-64 overflow-hidden" onClick={() => handleNavigate(card.id)}>
+                        <div className="relative w-full h-56 sm:h-64 overflow-hidden" onClick={() => handleNavigate(col._id)}>
 
                             <img
-                                src={card.img}
-                                alt={card.title}
+                                src={col?.thumbnail?.url}
+                                alt={col?.collectionName}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             />
 
@@ -77,9 +60,9 @@ const Collection = () => {
                             {/* Photo Count */}
                             <button type='button' className="absolute bottom-3 right-3 bg-black/70 text-white text-sm font-medium px-3 py-1 rounded-full" onClick={(e) => {
                                 e.stopPropagation();
-                                handleNavigate(card.id)
+                                handleNavigate(col._id)
                             }}>
-                                {card.photos} Photos
+                                {col.total} Photos
                             </button>
 
                             {/* Hover Overlay */}

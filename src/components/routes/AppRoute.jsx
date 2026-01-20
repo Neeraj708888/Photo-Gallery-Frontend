@@ -7,6 +7,7 @@ import Login from "../pages/web/Login";
 import AdminLayout from "../layouts/AdminLayout";
 import Collection from "../pages/web/Collection";
 import PrivateRoute from "./PrivateRoute";
+import GalleryCards from "../pages/web/GalleryCrads";
 
 function AppRoute() {
   const router = createBrowserRouter([
@@ -14,10 +15,12 @@ function AppRoute() {
       path: "/",
       element: <WebsiteLayout />,
       children: [
-        { index: true, element: <>
+        {
+          index: true, element: <>
             <Hero />
             <Collection />
-          </> 
+            <GalleryCards />
+          </>
         },
         ...routes,
       ],

@@ -4,7 +4,7 @@ import { ArrowLeft, UploadCloud } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const CreatePhotos = ({ onBack }) => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     collection: "",
     gallery: "",
@@ -14,6 +14,7 @@ const CreatePhotos = ({ onBack }) => {
     photo: null,
   });
 
+  const [images, setImages] = useState([]);
   const [preview, setPreview] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
@@ -23,13 +24,19 @@ const CreatePhotos = ({ onBack }) => {
   };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setForm((s) => ({ ...s, photo: file }));
-      setPreview(URL.createObjectURL(file));
-    }
+    const files = Array.from(e.target.files);
+
+    const newImages = files.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+    }));
+
+    setImages((prev) => [...prev, ...newImages]);
   };
 
+  const removeImage = (index) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  }
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!form.collection || !form.gallery || !form.photo) {
@@ -116,86 +123,68 @@ const CreatePhotos = ({ onBack }) => {
             </select>
           </div>
 
-          {/* Quotes */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Quotes
-            </label>
-            <textarea
-              name="quotes"
-              value={form.quotes}
-              onChange={handleChange}
-              rows={3}
-              placeholder="Write a short quote (optional)"
-              className="w-full border border-pink-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-400 outline-none resize-none"
-            />
-          </div>
-
-          {/* Date & Time */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Date
-              </label>
-              <input
-                type="date"
-                name="date"
-                value={form.date}
-                onChange={handleChange}
-                className="w-full border border-pink-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-400 outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Time
-              </label>
-              <input
-                type="time"
-                name="time"
-                value={form.time}
-                onChange={handleChange}
-                className="w-full border border-pink-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-400 outline-none"
-              />
-            </div>
-          </div>
-
-          {/* Photo Upload with Live Preview */}
+          {/* Photo Upload with Preview Below */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Upload Photo <span className="text-red-500">*</span>
+              Upload Photos <span className="text-red-500">*</span>
             </label>
 
-            <div className="flex flex-col sm:flex-row items-center gap-6">
-              <div className="flex-1">
-                <label
-                  htmlFor="photo"
-                  className="flex flex-col items-center justify-center border-2 border-dashed border-pink-300 rounded-lg p-6 cursor-pointer hover:bg-pink-50 transition-all"
-                >
-                  <UploadCloud className="text-pink-500 mb-2" size={28} />
-                  <span className="text-sm text-gray-500">
-                    Click to upload photo
-                  </span>
-                  <input
-                    id="photo"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                </label>
-              </div>
+            {/* Upload Box */}
+            <label
+              htmlFor="photo"
+              className="w-full flex flex-col items-center justify-center border-2 border-dashed border-pink-300 rounded-xl p-10 cursor-pointer hover:bg-pink-50 transition-all"
+            >
+              <UploadCloud size={36} className="text-pink-500 mb-3" />
+              <p className="text-sm font-medium text-gray-600">
+                Click to upload images
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                You can upload multiple images
+              </p>
 
-              {preview && (
-                <motion.img
-                  src={preview}
-                  alt="Preview"
-                  className="w-40 h-40 object-cover rounded-xl shadow-md border border-pink-200"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                />
-              )}
-            </div>
+              <input
+                id="photo"
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleFileChange}
+                className="hidden"
+              />
+            </label>
+
+            {/* Preview Section */}
+            {images.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"
+              >
+                {images.map((img, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="relative group"
+                  >
+                    {/* Remove Button */}
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute top-2 right-2 bg-white/90 rounded-full p-1 shadow hover:bg-red-500 hover:text-white transition-all z-10"
+                    >
+                      ✕
+                    </button>
+
+                    {/* Image */}
+                    <img
+                      src={img.preview}
+                      alt="Preview"
+                      className="w-full h-40 object-contain rounded-xl border border-pink-200 bg-white"
+                    />
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
           </div>
 
           {/* Buttons */}
@@ -205,11 +194,10 @@ const CreatePhotos = ({ onBack }) => {
               whileTap={{ scale: 0.95 }}
               type="submit"
               disabled={submitting}
-              className={`px-6 py-2 rounded-full text-white font-semibold transition-all ${
-                submitting
-                  ? "bg-pink-300 cursor-wait"
-                  : "bg-pink-500 hover:bg-pink-600"
-              }`}
+              className={`px-6 py-2 rounded-full text-white font-semibold transition-all ${submitting
+                ? "bg-pink-300 cursor-wait"
+                : "bg-pink-500 hover:bg-pink-600"
+                }`}
             >
               {submitting ? "Uploading..." : "Submit Photo"}
             </motion.button>
