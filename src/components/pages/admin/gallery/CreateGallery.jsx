@@ -85,7 +85,7 @@ export default function CreateGallery() {
     }`;
 
   return (
-    <div className="max-w-7xl ml-12 mx-auto my-10 px-4">
+    <div className="max-w-7xl my-10 px-4 ml-12">
       {/* Header */}
       <div className="bg-gradient-to-r from-pink-600 to-red-500 text-white rounded-2xl p-6 shadow-xl">
         <div className="flex items-center justify-between">

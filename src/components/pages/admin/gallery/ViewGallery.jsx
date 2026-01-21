@@ -50,28 +50,28 @@ const ViewGallery = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pink-100 via-rose-100 to-white py-10 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-pink-100 via-rose-100 to-white py-4 px-4">
       <motion.div
-        className="max-w-6xl mx-auto bg-white/70 backdrop-blur-md rounded-3xl shadow-lg border border-pink-200 overflow-hidden "
+        className="w-full bg-white/70 backdrop-blur-md rounded-3xl shadow-lg border border-pink-200 overflow-hidden "
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-pink-200 bg-pink-50">
+        <div className="flex items-center justify-between px-14 py-4 gap-14 border-b border-pink-200 bg-pink-50">
           <h2 className="text-2xl font-bold text-pink-700">
             💒 View Gallery Details
           </h2>
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700 transition"
+            className="flex items-center gap-2 bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700 transition-all"
           >
             <ArrowLeft size={18} /> Back
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 grid md:grid-cols-2 gap-6">
+        <div className="p-2 grid md:grid-cols-2 gap-6 ml-8">
 
           {/* Main Image */}
           <motion.div
@@ -133,7 +133,7 @@ const ViewGallery = () => {
         </div>
 
         {/* All Photos */}
-        <div className="bg-white rounded-xl border border-pink-200 p-4 shadow-sm">
+        <div className="bg-white rounded-xl border border-pink-200 px-4 py-4 ml-8 mt-4 mr-3 shadow-sm mb-4">
           <h3 className="text-sm font-semibold text-pink-700 mb-3">
             📸 All Photos
           </h3>

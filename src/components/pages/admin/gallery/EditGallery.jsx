@@ -105,7 +105,7 @@ export default function EditGallery() {
 
   /* ================= UI ================= */
   return (
-    <div className="max-w-7xl mx-auto my-10 px-4">
+    <div className="max-w-7xl my-10 px-4 ml-12">
       {/* Header */}
       <div className="bg-gradient-to-r from-pink-600 to-red-500 text-white rounded-2xl p-6 shadow-xl">
         <h2 className="text-2xl font-extrabold">Edit Gallery</h2>

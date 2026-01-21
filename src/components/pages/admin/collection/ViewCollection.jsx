@@ -29,7 +29,7 @@ const ViewCollection = () => {
     <p className="text-center mt-10 text-red-500">Collection not found</p>
   )
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-rose-100 to-white flex items-center justify-center py-2 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-rose-100 to-white flex items-center justify-center py-4 px-4">
       <motion.div
         className="w-full bg-white/70 backdrop-blur-md border border-pink-200 rounded-3xl shadow-lg overflow-hidden"
         initial={{ opacity: 0, y: 50 }}
