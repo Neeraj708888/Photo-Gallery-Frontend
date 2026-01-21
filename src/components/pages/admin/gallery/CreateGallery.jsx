@@ -1,89 +1,91 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { UploadCloud } from "lucide-react";
-import { motion } from "framer-motion";
 import { createGallery } from "../../../../features/thunks/galleryThunk";
 import { getAllcollections } from "../../../../features/thunks/collectionThunk";
+import { UploadCloud } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function CreateGallery() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   // Redux state
-  const { loading } = useSelector((state) => state.galleries);
+  const { loading, errorMessage, successMessage } = useSelector(
+    (state) => state.galleries
+  );
   const { collections = [] } = useSelector((state) => state.collections);
 
-  // Local state
+  // Local states
   const [galleryName, setGalleryName] = useState("");
   const [collectionId, setCollectionId] = useState("");
-  const [images, setImages] = useState([]); // files
-  const [previews, setPreviews] = useState([]); // preview URLs
+  const [images, setImages] = useState([]); // { file, preview }
   const [focusedField, setFocusedField] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [successMsg, setSuccessMsg] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
 
-  // Fetch collections
+  // Fetch collections on mount
   useEffect(() => {
     dispatch(getAllcollections());
   }, [dispatch]);
 
-  // Handle multiple image selection
-  const handleImagesChange = (e) => {
+  // Handle image selection
+  const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    setImages((prev) => [...prev, ...files]);
-
-    const newPreviews = files.map((file) => URL.createObjectURL(file));
-    setPreviews((prev) => [...prev, ...newPreviews]);
+    const newImages = files.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+    }));
+    setImages((prev) => [...prev, ...newImages]);
   };
 
   // Remove image
   const removeImage = (index) => {
     setImages((prev) => prev.filter((_, i) => i !== index));
-    setPreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Submit form
+  // Submit gallery
   const handleSubmit = (e) => {
     e.preventDefault();
-
     if (!galleryName || !collectionId || images.length === 0) {
-      alert("All fields are required");
+      alert("All fields are required including at least one image.");
       return;
     }
 
     const formData = new FormData();
     formData.append("galleryName", galleryName);
     formData.append("collection", collectionId);
-    images.forEach((img) => formData.append("images", img)); // multiple images
+
+    // Append multiple images
+    images.forEach((img) => {
+      formData.append("images", img.file); // backend should handle array of images
+    });
 
     setSubmitting(true);
-    setSuccessMsg("");
-    setErrorMsg("");
-
     dispatch(createGallery(formData))
       .unwrap()
       .then(() => {
         setSubmitting(false);
-        setSuccessMsg("Gallery created successfully!");
+        navigate("/admin/gallery"); // ✅ go back
         setGalleryName("");
         setCollectionId("");
         setImages([]);
-        setPreviews([]);
       })
-      .catch((err) => {
-        setSubmitting(false);
-        setErrorMsg(err || "Something went wrong");
-      });
+      .catch(() => setSubmitting(false));
   };
+
+  useEffect(() => {
+    return () => {
+      images.forEach((img) => URL.revokeObjectURL(img.preview));
+    };
+  }, [images]);
+
 
   const inputWrapperClass = (field) =>
     `transition-shadow duration-200 rounded-lg p-1 ${focusedField === field ? "shadow-lg ring-2 ring-pink-300" : "shadow-sm"
     }`;
 
   return (
-    <div className="max-w-3xl mx-auto my-10 px-4">
+    <div className="max-w-7xl ml-12 mx-auto my-10 px-4">
       {/* Header */}
       <div className="bg-gradient-to-r from-pink-600 to-red-500 text-white rounded-2xl p-6 shadow-xl">
         <div className="flex items-center justify-between">
@@ -95,14 +97,16 @@ export default function CreateGallery() {
               Create gallery under selected collection.
             </p>
           </div>
-          <div className="text-sm bg-white/10 px-3 py-1 rounded-full">Creating</div>
+          <div className="text-sm bg-white/10 px-3 py-1 rounded-full">
+            Creating
+          </div>
         </div>
       </div>
 
       {/* Form */}
       <form
         onSubmit={handleSubmit}
-        className="mt-6 bg-white rounded-2xl p-6 shadow-lg border"
+        className="mt-6 bg-white rounded-2xl p-6 shadow-lg border space-y-6"
       >
         {/* Collection Select */}
         <label className="block mb-4">
@@ -129,7 +133,9 @@ export default function CreateGallery() {
 
         {/* Gallery Name */}
         <label className="block mb-4">
-          <span className="text-gray-700 font-medium mb-1 block">Gallery Name</span>
+          <span className="text-gray-700 font-medium mb-1 block">
+            Gallery Name
+          </span>
           <div className={inputWrapperClass("galleryName")}>
             <input
               type="text"
@@ -144,55 +150,58 @@ export default function CreateGallery() {
         </label>
 
         {/* Upload Images */}
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
-          Upload Photos <span className="text-red-500">*</span>
-        </label>
-        <div className="flex flex-col sm:flex-row items-center gap-6">
-          <div className="flex-1">
-            <label
-              htmlFor="images"
-              className="flex flex-col items-center justify-center border-2 border-dashed border-pink-300 rounded-lg p-6 cursor-pointer hover:bg-pink-50 transition-all"
-            >
-              <UploadCloud className="text-pink-500 mb-2" size={28} />
-              <span className="text-sm text-gray-500">
-                Click to upload photos
-              </span>
-              <input
-                id="images"
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleImagesChange}
-                className="hidden"
-              />
-            </label>
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Upload Photos <span className="text-red-500">*</span>
+          </label>
+          <label
+            htmlFor="images"
+            className="flex flex-col items-center justify-center border-2 border-dashed border-pink-300 rounded-lg p-6 cursor-pointer hover:bg-pink-50 transition-all"
+          >
+            <UploadCloud className="text-pink-500 mb-2" size={28} />
+            <span className="text-sm text-gray-500">
+              Click to upload one or more images
+            </span>
+            <input
+              id="images"
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleImageChange}
+              className="hidden"
+            />
+          </label>
 
-            {/* Preview */}
-            {previews.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"
-              >
-                {previews.map((url, index) => (
-                  <div key={index} className="relative group">
-                    <button
-                      type="button"
-                      onClick={() => removeImage(index)}
-                      className="absolute top-1 right-1 bg-white/90 rounded-full p-1 shadow hover:bg-red-500 hover:text-white transition-all z-10"
-                    >
-                      ✕
-                    </button>
-                    <img
-                      src={url}
-                      alt={`Preview ${index}`}
-                      className="w-full h-32 object-cover rounded-lg border border-pink-200"
-                    />
-                  </div>
-                ))}
-              </motion.div>
-            )}
-          </div>
+          {/* Image Previews */}
+          {images.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"
+            >
+              {images.map((img, idx) => (
+                <motion.div
+                  key={idx}
+                  className="relative group"
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => removeImage(idx)}
+                    className="absolute top-2 right-2 bg-white/90 rounded-full p-1 shadow hover:bg-red-500 hover:text-white transition-all z-10"
+                  >
+                    ✕
+                  </button>
+                  <img
+                    src={img.preview}
+                    alt={`Preview ${idx}`}
+                    className="w-full h-40 object-contain rounded-xl border border-pink-200 bg-white"
+                  />
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
         </div>
 
         {/* Buttons */}
@@ -200,12 +209,12 @@ export default function CreateGallery() {
           <button
             type="submit"
             disabled={submitting || loading}
-            className={`px-5 py-2 rounded-md font-semibold transition ${submitting
+            className={`px-5 py-2 rounded-md font-semibold transition ${submitting || loading
               ? "bg-pink-300 text-white cursor-wait"
               : "bg-pink-600 hover:bg-pink-700 text-white"
               }`}
           >
-            {submitting ? "Submitting..." : "Submit"}
+            {submitting || loading ? "Submitting..." : "Submit"}
           </button>
 
           <button
@@ -218,8 +227,12 @@ export default function CreateGallery() {
         </div>
 
         {/* Messages */}
-        {successMsg && <p className="mt-4 text-green-600 font-medium">{successMsg}</p>}
-        {errorMsg && <p className="mt-4 text-red-600 font-medium">{errorMsg}</p>}
+        {successMessage && (
+          <p className="mt-4 text-green-600 font-medium">{successMessage}</p>
+        )}
+        {errorMessage && (
+          <p className="mt-4 text-red-600 font-medium">{errorMessage}</p>
+        )}
       </form>
     </div>
   );
@@ -232,103 +245,68 @@ export default function CreateGallery() {
 
 
 
+// import React, { useEffect } from "react";
+// import { useDispatch, useSelector } from "react-redux";
+// import { clearPhotos, fetchPhotos } from "../../../../features/gallery/gallerySlice";
+
+// const GalleryList = () => {
+//   const dispatch = useDispatch();
+//   const { photos, loading, error } = useSelector((state) => state.gallery);
+
+//   useEffect(() => {
+//     dispatch(fetchPhotos());
+//   }, [dispatch]);
+
+//   return (
+//     <div className="min-h-screen bg-gradient-to-br from-pink-100 to-white p-6">
+//       <div className="max-w-6xl mx-auto">
+//         <div className="flex justify-between items-center mb-6">
+//           <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
+//             📸 Gallery
+//           </h2>
+//           <button
+//             onClick={() => dispatch(clearPhotos())}
+//             className="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-lg shadow-md transition-all"
+//           >
+//             Clear Photos
+//           </button>
+//         </div>
+
+//         {loading && (
+//           <div className="text-center text-pink-600 text-lg font-semibold">
+//             Loading photos...
+//           </div>
+//         )}
+//         {error && (
+//           <div className="text-center text-red-500 text-lg font-semibold">
+//             {error}
+//           </div>
+//         )}
+
+//         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+//           {photos.map((photo) => (
+//             <div
+//               key={photo.id}
+//               className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+//             >
+//               <img
+//                 src={photo.thumbnailUrl}
+//                 alt={photo.title}
+//                 className="w-full h-32 object-cover"
+//               />
+//               <div className="p-3">
+//                 <p className="text-gray-700 font-medium text-sm truncate">
+//                   {photo.title}
+//                 </p>
+//               </div>
+//             </div>
+//           ))}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default GalleryList;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-{/* Quotes */ }
-{/* <label className="block mb-4">
-          <span className="text-gray-700 font-medium mb-1 block">Quotes</span>
-          <div className={inputWrapperClass("quotes")}>
-            <textarea
-              name="quotes"
-              value={form.quotes}
-              onChange={handleChange}
-              onFocus={() => handleFocus("quotes")}
-              onBlur={handleBlur}
-              placeholder="Write your thoughts about this moment..."
-              rows={3}
-              className="w-full bg-transparent px-4 py-3 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none resize-none"
-            />
-          </div>
-        </label> */}
-
-{/* Date & Time */ }
-{/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          <label className="block">
-            <span className="text-gray-700 font-medium mb-1 block">Date</span>
-            <div className={inputWrapperClass("date")}>
-              <input
-                type="date"
-                name="date"
-                value={form.date}
-                onChange={handleChange}
-                onFocus={() => handleFocus("date")}
-                onBlur={handleBlur}
-                className="w-full bg-transparent px-4 py-3 rounded-lg text-gray-800 focus:outline-none"
-              />
-            </div>
-          </label>
-
-          <label className="block">
-            <span className="text-gray-700 font-medium mb-1 block">Time</span>
-            <div className={inputWrapperClass("time")}>
-              <input
-                type="time"
-                name="time"
-                value={form.time}
-                onChange={handleChange}
-                onFocus={() => handleFocus("time")}
-                onBlur={handleBlur}
-                className="w-full bg-transparent px-4 py-3 rounded-lg text-gray-800 focus:outline-none"
-              />
-            </div>
-          </label>
-        </div> */}
-
-
-{/* <label className="block mb-4">
-          <span className="text-gray-700 font-medium mb-1 block">
-            Upload Image
-          </span>
-          <div className={inputWrapperClass("image")}>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              onFocus={() => setFocusedField("image")}
-              onBlur={() => setFocusedField("")}
-              className="w-full px-4 py-2 rounded-lg text-gray-700 bg-transparent focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100"
-            />
-          </div>
-
-          {imagePreview && (
-            <div className="mt-4 flex justify-center">
-              <img
-                src={imagePreview}
-                alt="Preview"
-                className="w-48 h-36 object-cover rounded-lg border shadow-md"
-              />
-            </div>
-          )}
-        </label> */}

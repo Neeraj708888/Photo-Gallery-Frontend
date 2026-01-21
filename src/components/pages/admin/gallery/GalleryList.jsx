@@ -1,240 +1,209 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { Edit, Trash, Search, ImagePlus, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { createGallery } from "../../../../features/thunks/galleryThunk";
-import { getAllcollections } from "../../../../features/thunks/collectionThunk";
-import { UploadCloud } from "lucide-react";
-import { motion } from "framer-motion";
+import { useDispatch, useSelector } from "react-redux";
+import { deleteGallery, getAllGalleries, toggleGalleryStatus } from "../../../../features/thunks/galleryThunk";
+import DeleteModal from "../../modals/DeleteModal";
 
-export default function CreateGallery() {
-  const dispatch = useDispatch();
+const GalleryList = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { gallery, loading, errorMessage, successMessage } = useSelector(state => state.galleries);
+  const [search, setSearch] = useState("");
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  // Redux state
-  const { loading, errorMessage, successMessage } = useSelector(
-    (state) => state.galleries
-  );
-  const { collections = [] } = useSelector((state) => state.collections);
-
-  // Local states
-  const [galleryName, setGalleryName] = useState("");
-  const [collectionId, setCollectionId] = useState("");
-  const [images, setImages] = useState([]); // { file, preview }
-  const [focusedField, setFocusedField] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-
-  // Fetch collections on mount
   useEffect(() => {
-    dispatch(getAllcollections());
+    dispatch(getAllGalleries());
   }, [dispatch]);
 
-  // Handle image selection
-  const handleImageChange = (e) => {
-    const files = Array.from(e.target.files);
-    const newImages = files.map((file) => ({
-      file,
-      preview: URL.createObjectURL(file),
-    }));
-    setImages((prev) => [...prev, ...newImages]);
+  console.log("Gallery Data : ", gallery);
+
+  // 🔍 Filter galleries (SAFE)
+  const filtered = (gallery || []).filter((g) =>
+    g.galleryName?.toLowerCase().includes(search.toLowerCase())
+  );
+
+
+
+  // 🧠 Toggle status
+  const handleStatusToggle = (item) => {
+    dispatch(toggleGalleryStatus({
+      id: item._id,
+      status: !item.status,
+    })).then(() => dispatch(getAllGalleries()));
   };
 
-  // Remove image
-  const removeImage = (index) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
-  };
+  // Delete
+  const handleDeleteClick = (item) => {
+    setSelectedItem(item);
+    setIsDeleteOpen(true);
+  }
 
-  // Submit gallery
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!galleryName || !collectionId || images.length === 0) {
-      alert("All fields are required including at least one image.");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("galleryName", galleryName);
-    formData.append("collection", collectionId);
-
-    // Append multiple images
-    images.forEach((img) => {
-      formData.append("images", img.file); // backend should handle array of images
-    });
-
-    setSubmitting(true);
-    dispatch(createGallery(formData))
-      .unwrap()
+  const confrimDelete = () => {
+    dispatch(deleteGallery(selectedItem._id))
       .then(() => {
-        setSubmitting(false);
-        setGalleryName("");
-        setCollectionId("");
-        setImages([]);
-      })
-      .catch(() => setSubmitting(false));
+        setIsDeleteOpen(false);
+        setSelectedItem(null);
+        dispatch(getAllGalleries());
+      });
   };
 
-  const inputWrapperClass = (field) =>
-    `transition-shadow duration-200 rounded-lg p-1 ${focusedField === field ? "shadow-lg ring-2 ring-pink-300" : "shadow-sm"
-    }`;
+  const cancelDelete = () => {
+    setIsDeleteOpen(false);
+    setSelectedItem(null);
+  };
+
+
+  if (loading) {
+    return <p className="text-center text-pink-500">Loading galleries...</p>;
+  }
 
   return (
-    <div className="max-w-3xl mx-auto my-10 px-4">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-pink-600 to-red-500 text-white rounded-2xl p-6 shadow-xl">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-extrabold tracking-tight">
-              Create Gallery Details
-            </h2>
-            <p className="text-pink-100/90 mt-1">
-              Create gallery under selected collection.
-            </p>
+    <section className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-white pl-3 sm:pl-4 md:pl-6 lg:pl-0 ">
+      {/* 🌸 Header */}
+      <div className="flex flex-col px-14  sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <h1 className="text-3xl font-semibold text-pink-600 flex items-center gap-4 ">
+          <ImagePlus className="w-7 h-7" />
+          Gallery Management
+        </h1>
+
+        {/* Search + Create */}
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto sm:items-center">
+          <div className="relative w-full sm:w-72">
+            <Search
+              className="absolute left-3 top-2.5 text-gray-400"
+              size={18}
+            />
+            <input
+              type="text"
+              placeholder="Search Gallery..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-pink-200 focus:ring-2 focus:ring-pink-400 outline-none transition-all bg-white"
+            />
           </div>
-          <div className="text-sm bg-white/10 px-3 py-1 rounded-full">
-            Creating
-          </div>
+
+          <button
+            className="bg-pink-600 text-white px-5 py-2 rounded-lg hover:bg-pink-700 transition duration-200 shadow-md"
+            onClick={() => navigate("/admin/gallery/create")}
+          >
+            + Create
+          </button>
         </div>
       </div>
 
-      {/* Form */}
-      <form
-        onSubmit={handleSubmit}
-        className="mt-6 bg-white rounded-2xl p-6 shadow-lg border space-y-6"
-      >
-        {/* Collection Select */}
-        <label className="block mb-4">
-          <span className="text-gray-700 font-medium mb-1 block">
-            Select Collection
-          </span>
-          <div className={inputWrapperClass("collection")}>
-            <select
-              value={collectionId}
-              onChange={(e) => setCollectionId(e.target.value)}
-              onFocus={() => setFocusedField("collection")}
-              onBlur={() => setFocusedField("")}
-              className="w-full bg-transparent px-4 py-3 rounded-lg text-gray-800 focus:outline-none appearance-none"
-            >
-              <option value="">-- Select a Collection --</option>
-              {collections.map((col) => (
-                <option key={col._id} value={col._id}>
-                  {col.collectionName}
-                </option>
-              ))}
-            </select>
-          </div>
-        </label>
+      {/* 🌺 Table Section */}
+      <div className="bg-white rounded-2xl max-w-7xl ml-12 shadow-lg border border-pink-100 overflow-x-auto">
+        <table className="min-w-[800px] w-full text-sm text-gray-700 border-collapse">
+          <thead className="bg-pink-100 text-pink-700">
+            <tr>
+              <th className="py-3 px-5 text-left font-semibold">SL</th>
+              <th className="py-3 px-5 text-left font-semibold">Image</th>
+              <th className="py-3 px-5 text-left font-semibold">Gallery Name</th>
+              <th className="py-3 px-5 text-center font-semibold">Status</th>
+              <th className="py-3 px-5 text-center font-semibold">Actions</th>
+            </tr>
+          </thead>
 
-        {/* Gallery Name */}
-        <label className="block mb-4">
-          <span className="text-gray-700 font-medium mb-1 block">
-            Gallery Name
-          </span>
-          <div className={inputWrapperClass("galleryName")}>
-            <input
-              type="text"
-              value={galleryName}
-              onChange={(e) => setGalleryName(e.target.value)}
-              onFocus={() => setFocusedField("galleryName")}
-              onBlur={() => setFocusedField("")}
-              placeholder="Enter gallery name"
-              className="w-full bg-transparent px-4 py-3 rounded-lg focus:outline-none"
-            />
-          </div>
-        </label>
-
-        {/* Upload Images */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Upload Photos <span className="text-red-500">*</span>
-          </label>
-          <label
-            htmlFor="images"
-            className="flex flex-col items-center justify-center border-2 border-dashed border-pink-300 rounded-lg p-6 cursor-pointer hover:bg-pink-50 transition-all"
-          >
-            <UploadCloud className="text-pink-500 mb-2" size={28} />
-            <span className="text-sm text-gray-500">
-              Click to upload one or more images
-            </span>
-            <input
-              id="images"
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleImageChange}
-              className="hidden"
-            />
-          </label>
-
-          {/* Image Previews */}
-          {images.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"
-            >
-              {images.map((img, idx) => (
-                <motion.div
-                  key={idx}
-                  className="relative group"
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
+          <tbody>
+            {filtered.length > 0 ? (
+              filtered.map((gallery, index) => (
+                <tr
+                  key={gallery._id}
+                  className="border-b border-pink-100 hover:bg-rose-50 transition duration-150"
                 >
-                  <button
-                    type="button"
-                    onClick={() => removeImage(idx)}
-                    className="absolute top-2 right-2 bg-white/90 rounded-full p-1 shadow hover:bg-red-500 hover:text-white transition-all z-10"
-                  >
-                    ✕
-                  </button>
-                  <img
-                    src={img.preview}
-                    alt={`Preview ${idx}`}
-                    className="w-full h-40 object-contain rounded-xl border border-pink-200 bg-white"
-                  />
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
-        </div>
+                  <td className="py-3 px-5">{index + 1}</td>
 
-        {/* Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
-          <button
-            type="submit"
-            disabled={submitting || loading}
-            className={`px-5 py-2 rounded-md font-semibold transition ${submitting || loading
-              ? "bg-pink-300 text-white cursor-wait"
-              : "bg-pink-600 hover:bg-pink-700 text-white"
-              }`}
-          >
-            {submitting || loading ? "Submitting..." : "Submit"}
-          </button>
+                  {/* Thumbnail */}
+                  <td className="py-3 px-5">
+                    <img
+                      src={gallery?.images?.[0]?.url}
+                      alt="Gallery"
+                      className="w-32 h-20 object-cover rounded-lg border border-pink-100 shadow-sm"
+                    />
+                  </td>
 
-          <button
-            type="button"
-            onClick={() => navigate("/admin/gallery")}
-            className="px-5 py-2 rounded-md font-semibold bg-pink-600 hover:bg-pink-700 text-white"
-          >
-            Back
-          </button>
-        </div>
+                  <td className="py-3 px-5 font-medium text-gray-800">
+                    {gallery.galleryName}
+                  </td>
 
-        {/* Messages */}
-        {successMessage && (
-          <p className="mt-4 text-green-600 font-medium">{successMessage}</p>
-        )}
-        {errorMessage && (
-          <p className="mt-4 text-red-600 font-medium">{errorMessage}</p>
-        )}
-      </form>
-    </div>
+                  {/* Status Toggle */}
+                  <td className="py-3 px-5 text-center">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={gallery.status === true}
+                        onChange={() => handleStatusToggle(gallery)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-12 h-6 bg-gray-300 rounded-full peer-checked:bg-pink-500 transition-all"></div>
+                      <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow peer-checked:translate-x-6 transition-all"></div>
+                    </label>
+                    <span
+                      className={`ml-2 text-sm font-medium ${gallery.status
+                        ? "text-pink-600"
+                        : "text-gray-500"
+                        }`}
+                    >
+                      {gallery.status ? "Active" : "Inactive"}
+                    </span>
+                  </td>
+
+                  {/* Actions */}
+                  <td className="py-3 px-5 text-center">
+                    <div className="flex justify-center gap-3 text-pink-600">
+                      <button
+                        title="View"
+                        className="hover:text-pink-700 transition" onClick={() => navigate(`/admin/gallery/view/${gallery._id}`)}
+                      >
+                        <Eye size={18} />
+                      </button>
+                      <button
+                        className="p-2 rounded-full hover:bg-pink-100 transition"
+                        onClick={() => navigate(`/admin/gallery/edit/${gallery?._id}`)}
+                        title="Edit"
+                      >
+                        <Edit size={18} />
+                      </button>
+                      <button
+                        className="p-2 rounded-full hover:bg-rose-100 text-red-600 transition"
+                        onClick={() => handleDeleteClick(gallery)}
+                        title="Delete"
+                      >
+                        <Trash size={18} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="text-center py-8 text-gray-500 italic"
+                >
+                  No galleries found 💫
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <DeleteModal
+        isOpen={isDeleteOpen}
+        onConfirm={confrimDelete}
+        onCancel={cancelDelete}
+        title="Delete Gallery"
+        message={`Are you sure you want to delete "${selectedItem?.galleryName}"`}
+      />
+
+    </section>
   );
-}
+};
 
-
-
-
-
-
+export default GalleryList;
 
 
 // import React, { useEffect } from "react";

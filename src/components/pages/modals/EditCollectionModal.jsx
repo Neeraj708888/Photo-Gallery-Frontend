@@ -53,7 +53,7 @@ const EditCollectionModal = ({ onClose, onSave, collection }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
+    <div className="fixed inset-0 ml-12 bg-black/40 flex items-center justify-center z-50 pl-4">
       <div
         ref={modalRef}
         className="bg-[#FFF7F8] w-full max-w-md rounded-2xl shadow-xl p-6 relative animate-fadeIn border border-pink-200"

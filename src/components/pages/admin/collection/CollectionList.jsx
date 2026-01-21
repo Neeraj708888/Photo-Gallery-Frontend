@@ -127,10 +127,14 @@ const CollectionList = () => {
   // ---------------- UI ----------------
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-white p-4 md:p-6">
-      <h1 className="text-3xl font-semibold text-pink-600 mb-6 tracking-wide">
-        💍 Collection Management
-      </h1>
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-white pl-3 sm:pl-4 md:pl-6 lg:pl-0 ">
+
+
+      <div className="flex flex-col px-14  sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <h1 className="text-3xl font-semibold text-pink-600 flex items-center gap-5 ">
+          💍 Collection Management
+        </h1>
+      </div>
 
       {errorMessage && (
         <p className="mb-4 text-red-500 font-medium">{errorMessage}</p>
@@ -140,7 +144,7 @@ const CollectionList = () => {
       )}
 
       {/* Search + Create */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+      <div className="flex flex-col px-14 sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <input
           type="text"
           placeholder="Search Collection..."
@@ -157,7 +161,7 @@ const CollectionList = () => {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto bg-white rounded-2xl shadow-lg border border-pink-100">
+      <div className="overflow-x-auto max-w-7xl ml-12 bg-white rounded-2xl shadow-lg border border-pink-100">
         <table className="min-w-full text-sm text-left text-gray-700">
           <thead className="bg-pink-100 text-pink-700">
             <tr>

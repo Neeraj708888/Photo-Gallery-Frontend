@@ -33,7 +33,7 @@ const Dashboard = () => {
       <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1529634899703-4c1e6e8ef91e?auto=format&fit=crop&w=1400&q=80')] bg-cover bg-center opacity-25 blur-sm"></div>
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/40 to-white/70 dark:via-black/40 dark:to-black/70"></div>
 
-      <div className="relative z-10 w-full max-w-6xl">
+      <div className="relative z-10 w-full max-w-7xl">
         {/* Header */}
         <motion.div
           className="text-center mb-10"
@@ -41,16 +41,18 @@ const Dashboard = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="text-3xl font-extrabold text-pink-700 tracking-tight">
-            💍 Wedding Collection Dashboard
-          </h1>
-          <p className="text-gray-600 mt-2">
+          <div className="flex flex-col px-14  sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <h1 className="text-3xl font-extrabold text-pink-700 flex items-center gap-5 ">
+              💍 Wedding Collection Dashboard
+            </h1>
+          </div>
+          <p className="text-gray-600 mt-2 px-14 text-start">
             Celebrate every ceremony — track your wedding memories in one place.
           </p>
         </motion.div>
 
         {/* Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid ml-12 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {collections.map((col, index) => (
             <motion.div
               key={col.id}

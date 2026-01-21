@@ -10,6 +10,8 @@ export const store = configureStore({
     collections: collectionReducer,
     galleries: galleryReducer,
     photos: photosReducer,
+
+
   },
 });
 

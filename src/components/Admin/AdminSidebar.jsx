@@ -89,7 +89,6 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
               icon: <Users size={20} />,
               href: "/admin/gallery",
             },
-            { label: "Photos", icon: <Image size={20} />, href: "/admin/photos" },
           ].map((item) => {
             const isActive = location.pathname === item.href;
             return (

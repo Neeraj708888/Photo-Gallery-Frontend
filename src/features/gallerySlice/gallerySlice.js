@@ -30,7 +30,17 @@ const gallerySlice = createSlice({
       .addCase(createGallery.fulfilled, (state, action) => {
         console.log("Create Gallery Slice Response: ", action.payload.data);
         state.loading = false;
-        state.gallery.unshift(action.payload.data); // ✅ safe
+        if (Array.isArray(state.gallery)) {
+          const exists = state.gallery.find(
+            (g) => g._id === action.payload.data._id
+          );
+          if (!exists) {
+            state.gallery.unshift(action.payload.data);
+          }
+        } else {
+          state.gallery = [action.payload.data];
+        }
+        // ✅ safe
         state.successMessage = action.payload.message;
       })
       .addCase(createGallery.rejected, (state, action) => {

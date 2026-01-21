@@ -29,15 +29,15 @@ const ViewCollection = () => {
     <p className="text-center mt-10 text-red-500">Collection not found</p>
   )
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-rose-100 to-white flex items-center justify-center py-10 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-rose-100 to-white flex items-center justify-center py-2 px-4">
       <motion.div
-        className="max-w-4xl w-full bg-white/70 backdrop-blur-md border border-pink-200 rounded-3xl shadow-lg overflow-hidden"
+        className="w-full bg-white/70 backdrop-blur-md border border-pink-200 rounded-3xl shadow-lg overflow-hidden"
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
         {/* Header Section */}
-        <div className="flex items-center justify-between px-6 py-4 bg-pink-50 border-b border-pink-200">
+        <div className="flex items-center justify-between px-14 py-4 bg-pink-50 border-b border-pink-200 gap-14">
           <h2 className="text-2xl font-bold text-pink-700">
             💐 View Collection Details
           </h2>
@@ -50,7 +50,7 @@ const ViewCollection = () => {
         </div>
 
         {/* Content Section */}
-        <div className="grid md:grid-cols-2 gap-6 p-6">
+        <div className="grid md:grid-cols-2 gap-6 px-1 py-8 ml-12">
           {/* Left: Collection Image */}
           <motion.div
             className="rounded-2xl overflow-hidden shadow-md border border-pink-100"
