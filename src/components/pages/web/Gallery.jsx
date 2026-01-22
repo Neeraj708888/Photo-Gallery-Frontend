@@ -23,7 +23,6 @@ const Gallery = () => {
         setIsOpen(prev => !prev);
     };
 
-
     const { hash } = useLocation();
 
     useEffect(() => {
@@ -48,43 +47,53 @@ const Gallery = () => {
     }
 
     return (
-        <section className="min-h-screen bg-gradient-to-b from-pink-100 via-rose-100 to-white py-16 px-4 mt-16" id="gallery">
+        <section
+            id="gallery"
+            className="min-h-screen bg-gradient-to-b from-pink-100 via-rose-100 to-white py-16 px-4 mt-16"
+        >
             <motion.div
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
                 className="
-                    max-w-7xl mx-auto min-h-screen
+                    max-w-7xl mx-auto
                     bg-white/80 backdrop-blur-xl
                     rounded-3xl shadow-2xl
                     border border-pink-200 overflow-hidden
                 "
             >
-                <div className="grid lg:grid-cols-2 min-h-[420px] lg:min-h-[520px]">
+                {/* MAIN GRID */}
+                <div className="grid lg:grid-cols-2">
 
-                    {/* LEFT IMAGE */}
-                    <div className="relative lg:min-h-[350px] lg:min-h-full">
+                    {/* 🌸 LEFT IMAGE (FULL SCREEN ON MOBILE) */}
+                    <div className="
+                        relative
+                        h-[85vh]           /* ✅ Mobile Full Height */
+                        lg:h-auto
+                        lg:min-h-[520px]
+                    ">
                         <motion.img
                             src={singleGallery?.images?.[0]?.url}
                             alt={singleGallery?.galleryName}
-                            className="absolute inset-0 w-full h-full object-cover"
-                            initial={{ scale: 1.06 }}
+                            className="w-full h-full object-cover"
+                            initial={{ scale: 1.08 }}
                             animate={{ scale: 1 }}
-                            transition={{ duration: 0.7 }}
+                            transition={{ duration: 0.8 }}
                         />
 
+                        {/* Overlay */}
                         <div className="absolute inset-0 bg-gradient-to-tr from-black/60 via-black/30 to-transparent" />
 
-                        <div className="absolute bottom-8 left-8 right-8">
-                            <h2 className="text-3xl font-bold text-white drop-shadow-lg">
+                        {/* Title */}
+                        <div className="absolute bottom-10 left-6 right-6">
+                            <h2 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-lg">
                                 📸 {singleGallery?.galleryName}
                             </h2>
                         </div>
                     </div>
 
-                    {/* RIGHT CONTENT */}
-                    <div className="p-8 lg:p-10 flex flex-col justify-center space-y-6">
-
+                    {/* 🌸 RIGHT CONTENT */}
+                    <div className="p-8 lg:p-12 flex flex-col justify-center space-y-6">
                         <div>
                             <h3 className="text-sm uppercase tracking-widest text-gray-500 mb-2">
                                 About This Gallery
@@ -99,7 +108,7 @@ const Gallery = () => {
                             </p>
                         </div>
 
-                        <div className="flex gap-4">
+                        <div className="flex gap-4 flex-wrap">
                             <button
                                 onClick={() => navigate(-1)}
                                 className="
@@ -113,7 +122,7 @@ const Gallery = () => {
                             </button>
 
                             <button
-                                onClick={handleOpenPhotos}   // ✅ FIXED
+                                onClick={handleOpenPhotos}
                                 className="
                                     px-6 py-2.5 rounded-lg
                                     border border-pink-300 text-pink-700
@@ -123,10 +132,10 @@ const Gallery = () => {
                                 View Photos
                             </button>
                         </div>
-
                     </div>
                 </div>
 
+                {/* FOOTER */}
                 <div className="bg-pink-50 border-t border-pink-200 py-4 text-center">
                     <p className="text-sm text-pink-700 font-medium">
                         💞 Preserving Moments, Creating Memories 💞
@@ -134,10 +143,8 @@ const Gallery = () => {
                 </div>
             </motion.div>
 
-            {/* Photos */}
-            {isOpen && (
-                <Photos images={singleGallery.images} />
-            )}
+            {/* PHOTOS SECTION */}
+            {isOpen && <Photos images={singleGallery.images} />}
         </section>
     );
 };
