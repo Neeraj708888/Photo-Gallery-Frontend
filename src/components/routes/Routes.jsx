@@ -2,7 +2,6 @@ import Login from "../pages/web/Login";
 import Gallery from "../pages/web/Gallery";
 import Photos from "../pages/web/Photos";
 import Dashboard from "../pages/admin/Dashboard";
-import Collection from "../pages/web/Collection";
 import GalleryList from "../pages/admin/gallery/GalleryList";
 import CreateGallery from "../pages/admin/gallery/CreateGallery";
 import EditGallery from "../pages/admin/gallery/EditGallery";
@@ -15,12 +14,12 @@ import EditPhotos from "../pages/admin/photos/EditPhotos";
 import ViewPhoto from "../pages/admin/photos/ViewPhoto";
 import ViewGallery from "../pages/admin/gallery/ViewGallery";
 import ViewCollection from "../pages/admin/collection/ViewCollection";
+import CollectionDetails from "../pages/web/CollectionDetails";
 
 export const routes = [
   { path: "login", element: <Login /> },
-  { path: "collection", element: <Collection /> },
+  { path: "collection/:collectionId", element: <CollectionDetails /> },
   { path: "gallery/:galleryId", element: <Gallery /> },
-  { path: "photos/:photoId", element: <Photos /> },
 ];
 
 export const adminRoute = [

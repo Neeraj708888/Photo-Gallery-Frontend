@@ -17,7 +17,7 @@ const Collection = () => {
 
     const handleNavigate = (id) => {
         console.log("Hit Collection Id: ", id);
-        navigate(`/gallery/${id}`);
+        navigate(`/collection/${id}`);
     };
 
     return (

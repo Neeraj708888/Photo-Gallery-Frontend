@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react"; // npm install lucide-react
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { Menu, X } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 
 const Navbar = () => {
 
-    const navigate = useNavigate();
+    const location = useLocation();
+    const menuRef = useRef(null);
     const [isOpen, setIsOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
 
-    // Detect scroll to change navbar style
+
     useEffect(() => {
         const handleScroll = () => {
-            setIsScrolled(window.scrollY > 50); // adjust 50px threshold as needed
+            setIsScrolled(window.scrollY > 50);
         };
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
@@ -19,55 +20,79 @@ const Navbar = () => {
 
     const toggleMenu = () => setIsOpen(!isOpen);
 
+    // ✅ FIXED active logic
+    const isActive = (path) => location.pathname === path;
+
+    // Menu close if click outside or options
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (isOpen && menuRef.current && !menuRef.current.contains(e.target)) {
+                setIsOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [isOpen]);
+
+
     return (
         <nav
-            className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 text-dynamic ${isScrolled
+            className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${isScrolled
                 ? "bg-white shadow-md text-gray-800"
-                : "bg-white/10 ackdrop-blur-md text-black"
+                : "bg-white/10 backdrop-blur-md text-black"
                 }`}
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                {/* Main Navbar container */}
                 <div className="flex justify-between items-center h-16">
+
                     {/* Logo */}
-                    <div className="flex-shrink-0 flex items-center">
-                        <img
-                            src="/logo.jpeg"
-                            alt="Logo"
-                            className="h-12 w-12 mr-2 rounded-l-lg"
-                        />
-                        <span
-                            className={`text-xl font-semibold transition-colors ${isScrolled ? "text-gray-800" : "text-blue-400"
-                                }`}
-                        >
+                    <div className="flex items-center">
+                        <img src="/logo.jpeg" alt="Logo" className="h-12 w-12 mr-2 rounded-l-lg" />
+                        <span className={`text-xl font-semibold ${isScrolled ? "text-gray-800" : "text-blue-400"}`}>
                             Photo Gallery
                         </span>
                     </div>
 
                     {/* Desktop Menu */}
                     <div className="hidden md:flex space-x-6">
-                        {[{ name: "/", path: "Home" }, { name: "/gallery", path: "Gallery" }, { name: "/blog", path: "Blog" }, { name: "/about", path: "About Us" }, { name: "/login", path: "Login" }].map(
-                            (item, index) => (
-                                <Link
-                                    key={index}
-                                    to={item.name}
-                                    className={`font-medium transition-colors ${isScrolled
-                                        ? "text-gray-700 hover:text-blue-600"
-                                        : "text-white/90 hover:text-blue-400"
-                                        }`}
-                                >
-                                    {item.path}
-                                </Link>
-                            )
-                        )}
+                        {[
+                            { name: "/", label: "Home" },
+                            { name: "/gallery", label: "Gallery" },
+                            { name: "/blog", label: "Blog" },
+                            { name: "/about", label: "About Us" },
+                            { name: "/login", label: "Login" }
+                        ].map((item, index) => (
+                            <Link
+                                key={index}
+                                to={item.name}
+                                className={`relative font-medium transition-colors
+${isActive(item.name)
+                                        ? "text-pink-600 after:w-full"
+                                        : ""
+                                    }
+after:absolute after:left-0 after:-bottom-1
+after:h-[2px] after:bg-pink-600
+after:w-0 after:transition-all after:duration-300 after:ease-in-out
+hover:after:w-full
+${!isActive(item.name)
+                                        ? isScrolled
+                                            ? "text-gray-700 hover:text-blue-600"
+                                            : "text-white/90 hover:text-blue-400"
+                                        : ""
+                                    }`}
+
+                            >
+                                {item.label}
+                            </Link>
+                        ))}
                     </div>
 
                     {/* Mobile Menu Button */}
-                    <div className="md:hidden flex items-center">
+                    <div className="md:hidden">
                         <button
                             onClick={toggleMenu}
-                            className={`focus:outline-none transition-colors ${isScrolled ? "text-gray-800" : "text-red-800"
-                                }`}
+                            className={isScrolled ? "text-gray-800" : "text-red-800"}
                         >
                             {isOpen ? <X size={28} /> : <Menu size={28} />}
                         </button>
@@ -77,28 +102,45 @@ const Navbar = () => {
 
             {/* Mobile Menu */}
             {isOpen && (
-                <div
-                    className={`md:hidden border-t ${isScrolled
-                        ? "bg-white text-gray-800 border-gray-200"
-                        : "bg-white/10 backdrop-blur-lg text-white border-white/20"
-                        }`}
+                <div className={`md:hidden border-t ${isScrolled
+                    ? "bg-white text-gray-800"
+                    : "bg-white/10 backdrop-blur-lg text-white"
+                    }`}
+                    ref={menuRef}
                 >
                     <ul className="flex flex-col px-6 py-4 space-y-3">
-                        {[{ name: "/", path: "Home" }, { name: "/gallery", path: "Gallery" }, { name: "/blog", path: "Blog" }, { name: "/about", path: "About Us" }, { name: "/login", path: "Login" }].map(
-                            (item, index) => (
-                                <li key={index}>
-                                    <Link
-                                        to={item.name}
-                                        className={`block font-medium transition-colors ${isScrolled
-                                            ? "text-gray-700 hover:text-blue-600"
-                                            : "text-white/90 hover:text-blue-400"
-                                            }`}
-                                    >
-                                        {item.path}
-                                    </Link>
-                                </li>
-                            )
-                        )}
+                        {[
+                            { name: "/", label: "Home" },
+                            { name: "/gallery", label: "Gallery" },
+                            { name: "/blog", label: "Blog" },
+                            { name: "/about", label: "About Us" },
+                            { name: "/login", label: "Login" }
+                        ].map((item, index) => (
+                            <li key={index}>
+                                <Link
+                                    to={item.name}
+                                    onClick={() => setIsOpen(false)}
+                                    className={`relative font-medium transition-colors
+${isActive(item.name)
+                                            ? "text-pink-600 after:w-full"
+                                            : ""
+                                        }
+after:absolute after:left-0 after:-bottom-1
+after:h-[2px] after:bg-pink-600
+after:w-0 after:transition-all after:duration-300 after:ease-in-out
+hover:after:w-full
+${!isActive(item.name)
+                                            ? isScrolled
+                                                ? "text-gray-700 hover:text-blue-600"
+                                                : "text-white/90 hover:text-blue-400"
+                                            : ""
+                                        }`}
+
+                                >
+                                    {item.label}
+                                </Link>
+                            </li>
+                        ))}
                     </ul>
                 </div>
             )}

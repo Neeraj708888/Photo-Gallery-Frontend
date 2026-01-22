@@ -34,7 +34,7 @@ const GalleryCards = () => {
                     <div
                         key={photo._id}
                         className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer"
-                        onClick={() => navigate('/collection')}
+                        onClick={() => navigate(`/gallery/${photo._id}`)}
                     >
                         {/* Image */}
                         <div className="relative w-full h-56 sm:h-64 overflow-hidden">
