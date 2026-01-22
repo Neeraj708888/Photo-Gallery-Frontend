@@ -33,11 +33,11 @@ const Collection = () => {
             </div>
 
             {/* Cards Grid */}
-            <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:place-items-start lg:place-items-center">
+            <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                 {collections.map((col) => (
                     <div
                         key={col._id}
-                        className="group cursor-pointer overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 bg-white flex flex-col justify-between w-full max-w-[300px]"
+                        className="group cursor-pointer overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 bg-white"
                     >
                         {/* Title */}
                         <div className="p-4 flex items-center justify-between">
@@ -58,12 +58,12 @@ const Collection = () => {
 
 
                             {/* Photo Count */}
-                            <button type='button' className="absolute bottom-3 right-3 bg-black/70 text-white text-sm font-medium px-3 py-1 rounded-full" onClick={(e) => {
+                            {/* <button type='button' className="absolute bottom-3 right-3 bg-black/70 text-white text-sm font-medium px-3 py-1 rounded-full" onClick={(e) => {
                                 e.stopPropagation();
                                 handleNavigate(col._id)
                             }}>
-                                {col.total} Photos
-                            </button>
+                                {collections.total} Photos
+                            </button> */}
 
                             {/* Hover Overlay */}
                             <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

@@ -37,9 +37,9 @@ const GalleryCards = () => {
                         onClick={() => navigate('/collection')}
                     >
                         {/* Image */}
-                        <div className="relative w-full h-60 sm:h-72 overflow-hidden">
+                        <div className="relative w-full h-56 sm:h-64 overflow-hidden">
                             <img
-                                src={photo?.thumbnail?.url}
+                                src={photo?.images?.[0]?.url}
                                 alt={photo.gallerName}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             />
@@ -48,11 +48,15 @@ const GalleryCards = () => {
                         </div>
 
                         {/* Text Info */}
-                        <div className="p-4 flex flex-col justify-between">
-                            <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">
-                                {photo.galleryName}
-                            </h3>
-                            <p className="text-gray-500 text-sm">{photo.date}</p>
+
+                        <div className="p-4 flex flex-row justify-between">
+                            <div className="flex flex-col">
+                                <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">
+                                    {photo.galleryName}
+                                </h3>
+                                <p className="text-gray-500 text-sm">{new Date(photo.createdAt).toLocaleString()}</p>
+                            </div>
+                            <p className="font-semibold text-pink-600">{photo.images.length} <span className="text-gray-600">Photos</span></p>
                         </div>
                     </div>
                 ))}

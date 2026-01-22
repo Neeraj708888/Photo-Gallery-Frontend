@@ -39,7 +39,7 @@ const Gallery = () => {
                     {/* Image */}
                     <div className="relative w-full h-60 sm:h-72 overflow-hidden">
                         <img
-                            src={singleCollection?.thumbnail?.url}
+                            src={singleCollection?.images?.url}
                             alt={singleCollection?.collectionName}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
